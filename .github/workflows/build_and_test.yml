@@ -26,16 +26,14 @@ jobs:
         run: mvn package
 
       - name: Build and test with Maven
-        run: mvn clean verify jacoco:report
+        run: mvn clean verify
 
-      - name: Report Test Coverage (classes consideradas)
+      - name: Report Test Coverage
         run: |
           sudo apt-get update
           sudo apt-get install -y xmlstarlet
           
-          sed -i '/<!DOCTYPE report PUBLIC/d' target/site/jacoco/jacoco.xml
-          
-          echo "Gerando Relatório de Cobertura de Testes (apenas classes incluídas conforme pom.xml):"
+          echo "Gerando Relatório de Cobertura de Testes :"
           COVERED=$(xmlstarlet sel -t -v "/report/counter[@type='LINE']/@covered" target/site/jacoco/jacoco.xml)
           MISSED=$(xmlstarlet sel -t -v "/report/counter[@type='LINE']/@missed" target/site/jacoco/jacoco.xml)
           
@@ -44,7 +42,7 @@ jobs:
             echo "Nenhum dado de teste encontrado."
           else
             COVERAGE=$(echo "scale=2; 100 * $COVERED / $TOTAL" | bc)
-            echo "Cobertura global (linhas das classes consideradas): $COVERAGE%"
+            echo "Cobertura de teste : $COVERAGE%"
           fi
 
       - name: Upload coverage report
