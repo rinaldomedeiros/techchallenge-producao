@@ -13,11 +13,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -90,14 +86,35 @@ public class OrderServiceTest {
         // Act: Atualiza o status do pedido
         Order updatedOrder = orderService.updateOrderStatus(orderId, newStatus);
 
+        Map<String, Object> updatedOrderMessage = new HashMap<>();
+        updatedOrderMessage.put("id", order.getId());
+        updatedOrderMessage.put("status", order.getStatus());
+
         // Assert: Verifica se o status foi atualizado e se as operações foram chamadas
         assertEquals(newStatus, updatedOrder.getStatus());
+
+        // 1. Verifica se o Map não é nulo
+        assertNotNull(updatedOrderMessage);
+
+        // 2. Verifica se o objeto é uma instância de Map
+        assertTrue(updatedOrderMessage instanceof Map);
+
+        // 3. Verifica se o Map possui exatamente 2 elementos
+        assertEquals(2, updatedOrderMessage.size());
+
+        // 4. Verifica se contém a chave "id" com o valor esperado
+        assertTrue(updatedOrderMessage.containsKey("id"));
+        assertEquals("123", updatedOrderMessage.get("id"));
+        // 5. Verifica se contém a chave "status" com o valor esperado
+        assertTrue(updatedOrderMessage.containsKey("status"));
+        assertEquals(OrderStatus.EM_PREPARACAO, updatedOrderMessage.get("status"));
+
         verify(valueOperations).get(key);
         verify(valueOperations).set(key, order);
         verify(rabbitTemplate).convertAndSend(
                 RabbitMQConfig.UPDATED_ORDER_EXCHANGE,
                 RabbitMQConfig.UPDATED_ORDER_ROUTING_KEY,
-                order);
+                updatedOrderMessage);
     }
 
     @Test

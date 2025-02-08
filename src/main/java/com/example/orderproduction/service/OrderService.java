@@ -9,9 +9,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -46,10 +44,14 @@ public class OrderService {
         order.setStatus(newStatus);
         redisTemplate.opsForValue().set(key, order);
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.UPDATED_ORDER_EXCHANGE,
-                RabbitMQConfig.UPDATED_ORDER_ROUTING_KEY, order);
+        Map<String, Object> updatedOrderMessage = new HashMap<>();
+        updatedOrderMessage.put("id", order.getId());
+        updatedOrderMessage.put("status", order.getStatus());
 
-        logger.info("Enviado o pedido {} para fila de status do pedido com o status {}", order.getId(), order.getStatus());
+        rabbitTemplate.convertAndSend(RabbitMQConfig.UPDATED_ORDER_EXCHANGE,
+                RabbitMQConfig.UPDATED_ORDER_ROUTING_KEY, updatedOrderMessage);
+
+        logger.info("Enviado o pedido {} para fila de pedidos atualizados com o status {}", order.getId(), order.getStatus());
         return order;
     }
 

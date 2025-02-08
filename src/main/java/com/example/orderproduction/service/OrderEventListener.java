@@ -14,7 +14,7 @@ public class OrderEventListener {
         this.orderService = orderService;
     }
 
-    // Escuta eventos de pedidos novos que chegam na fila de entrada
+    // Escuta eventos de pedidos novos que chegam na fila de pedidos pagos
     @RabbitListener(queues = RabbitMQConfig.PAID_ORDER_QUEUE)
     public void receiveOrder(Order order) {
         orderService.processOrder(order);

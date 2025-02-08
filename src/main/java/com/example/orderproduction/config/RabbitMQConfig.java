@@ -22,7 +22,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue paidOrderQueue() {
-        return new Queue(PAID_ORDER_QUEUE);
+        return QueueBuilder.durable(PAID_ORDER_QUEUE).build();
     }
 
     @Bean
@@ -37,7 +37,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue updatedOrderQueue() {
-        return new Queue(UPDATED_ORDER_QUEUE);
+        return QueueBuilder.durable(UPDATED_ORDER_QUEUE).build();
     }
 
     @Bean
