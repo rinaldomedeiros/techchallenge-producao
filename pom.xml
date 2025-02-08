@@ -102,8 +102,13 @@
                             <goal>report</goal>
                         </goals>
                         <configuration>
+                            <includes>
+                                <include>com/example/orderproduction/service/**</include>
+                                <include>com/example/orderproduction/controller/**</include>
+                                <include>com/example/orderproduction/repository/**</include>
+                            </includes>
+
                             <excludes>
-                                <exclude>**/com/example/orderproduction/model/**</exclude>
                                 <exclude>**/com/example/orderproduction/configuration/**</exclude>
                                 <exclude>**/com/example/orderproduction/OrderProductionApplication.java</exclude>
                             </excludes>

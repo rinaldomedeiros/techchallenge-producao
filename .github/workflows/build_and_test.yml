@@ -28,15 +28,12 @@ jobs:
       - name: Build and test with Maven
         run: mvn clean verify jacoco:report
 
-      # Step para exibir a cobertura de testes (usando xmlstarlet para fazer o parsing do arquivo jacoco.xml)
       - name: Report Test Coverage
         run: |
-          # Atualiza o apt-get e instala o xmlstarlet para manipulação de XML
           sudo apt-get update
           sudo apt-get install -y xmlstarlet
           
-          echo "Gerando Relatório de Cobertura de Testes:"
-          # Localiza os valores de linhas cobertas e não cobertas no arquivo jacoco.xml
+          echo "Gerando Relatório de Cobertura de Testes :"
           COVERED=$(xmlstarlet sel -t -v "/report/counter[@type='LINE']/@covered" target/site/jacoco/jacoco.xml)
           MISSED=$(xmlstarlet sel -t -v "/report/counter[@type='LINE']/@missed" target/site/jacoco/jacoco.xml)
           
@@ -44,26 +41,9 @@ jobs:
           if [ $TOTAL -eq 0 ]; then
             echo "Nenhum dado de teste encontrado."
           else
-            # Calcula a porcentagem de cobertura
             COVERAGE=$(echo "scale=2; 100 * $COVERED / $TOTAL" | bc)
-            echo "Cobertura global (linha): $COVERAGE%"
+            echo "Cobertura de teste : $COVERAGE%"
           fi
-
-      # Step para exibir um resumo dos testes executados (fazendo o parsing dos arquivos gerados pelo Surefire)
-      - name: Report Test Execution Summary
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xmlstarlet
-          
-          echo "Resumo da Execução dos Testes:"
-          for file in target/surefire-reports/TEST-*.xml; do
-            echo "Processando $file"
-            TESTS=$(xmlstarlet sel -t -v "/testsuite/@tests" "$file")
-            FAILURES=$(xmlstarlet sel -t -v "/testsuite/@failures" "$file")
-            ERRORS=$(xmlstarlet sel -t -v "/testsuite/@errors" "$file")
-            SKIPPED=$(xmlstarlet sel -t -v "/testsuite/@skipped" "$file")
-            echo "Testes: $TESTS, Falhas: $FAILURES, Erros: $ERRORS, Ignorados: $SKIPPED"
-          done
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
