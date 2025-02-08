@@ -26,10 +26,7 @@ jobs:
         run: mvn package
 
       - name: Build and test with Maven
-        run: mvn clean verify
-
-      - name: Generate JaCoCo test coverage report
-        run: mvn jacoco:report
+        run: mvn clean verify jacoco:report
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
