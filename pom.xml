@@ -49,17 +49,11 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Dependências para testes -->
+        <!-- Spring Boot Starter Test (inclui TestRestTemplate, etc.) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.vintage</groupId>
-                    <artifactId>junit-vintage-engine</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Dependências para Cucumber (BDD) -->
@@ -69,14 +63,12 @@
             <version>${cucumber.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-spring</artifactId>
             <version>${cucumber.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit</artifactId>
@@ -84,31 +76,19 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- AssertJ para asserções -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.23.1</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-java</artifactId>
-            <version>7.11.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-spring</artifactId>
-            <version>7.11.2</version>
-            <scope>compile</scope>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>5.9.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -170,18 +150,23 @@
                 <version>3.0.0-M7</version>
                 <executions>
                     <execution>
+                        <id>integration-tests</id>
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
                         </goals>
                         <configuration>
                             <includes>
-                                <include>**/CucumberTest.java</include>
+                                <include>**/*IT.java</include>  <!-- Isso inclui o CucumberIT -->
+                                <include>**/*ITCase.java</include>
                             </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>2</threadCount>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
         <resources>
             <resource>

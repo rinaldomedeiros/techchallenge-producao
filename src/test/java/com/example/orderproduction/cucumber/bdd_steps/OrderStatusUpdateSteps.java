@@ -23,7 +23,7 @@ public class OrderStatusUpdateSteps {
     private String orderId;
     private ResponseEntity<Order> queryResponse;
 
-    // Constructor injection – Spring will inject both TestRestTemplate and RedisTemplate.
+
     public OrderStatusUpdateSteps(TestRestTemplate restTemplate, RedisTemplate<String, Object> redisTemplate) {
         this.restTemplate = restTemplate;
         this.redisTemplate = redisTemplate;
@@ -63,9 +63,22 @@ public class OrderStatusUpdateSteps {
 
     @And("ao consultar o pedido, o status deve ser {string}")
     public void whenIQueryTheOrderItsStatusShouldBe(String expectedStatus) {
+        assertThat(queryResponse.getStatusCode().is2xxSuccessful())
+                .as("Expected GET /orders/{id} to return a successful response, but received: " + queryResponse.getStatusCode())
+                .isTrue();
+
+        // Obtém o pedido da resposta
         Order queriedOrder = queryResponse.getBody();
-        assertThat(queriedOrder).isNotNull();
-        assertThat(queriedOrder.getStatus()).isEqualTo(OrderStatus.valueOf(expectedStatus));
+
+        // Assegura que o pedido não é nulo
+        assertThat(queriedOrder)
+                .as("Expected an order in the response body. The order was not found in Redis.")
+                .isNotNull();
+
+        // Verifica se o status do pedido é igual ao esperado
+        assertThat(queriedOrder.getStatus())
+                .as("Expected order status to be " + expectedStatus + " but was " + queriedOrder.getStatus())
+                .isEqualTo(OrderStatus.valueOf(expectedStatus));
     }
 }
 
