@@ -1,4 +1,4 @@
-package com.example.orderproduction;
+package com.example.orderproduction.cucumber;
 
 import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;

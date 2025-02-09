@@ -7,5 +7,5 @@ Feature: Atualização de Status do Pedido e Envio para a Fila
   Scenario: Atualização de status de um pedido
   Given que recebo um pedido com status "RECEBIDO"
   When atualizo o status do pedido para "EM_PREPARACAO"
-  Then o pedido é enviado para a fila de "UPDATED_ORDER_QUEUE"
+  Then o pedido é enviado para a fila de pedidos atualizados
   And ao consultar o pedido, o status deve ser "EM_PREPARACAO"
