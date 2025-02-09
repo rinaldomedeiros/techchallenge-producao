@@ -1,0 +1,84 @@
+name: Build and Test Application
+
+on:
+  push:
+    branches:
+      - feature/**
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Wait for Redis and RabbitMQ to be healthy
+        run: |
+          echo "Aguardando Redis ficar disponível..."
+          until nc -z localhost 6379; do sleep 1; done
+          echo "Redis está pronto!"
+
+          echo "Aguardando RabbitMQ ficar disponível..."
+          until nc -z localhost 5672; do sleep 1; done
+          echo "RabbitMQ está pronto!"
+
+      - name: Build application
+        run: mvn package
+
+      - name: Build and test with Maven
+        run: mvn clean verify
+
+      - name: Report Test Coverage
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xmlstarlet
+          
+          echo "Gerando Relatório de Cobertura de Testes :"
+          COVERED=$(xmlstarlet sel -t -v "/report/counter[@type='LINE']/@covered" target/site/jacoco/jacoco.xml)
+          MISSED=$(xmlstarlet sel -t -v "/report/counter[@type='LINE']/@missed" target/site/jacoco/jacoco.xml)
+          
+          TOTAL=$((COVERED + MISSED))
+          if [ $TOTAL -eq 0 ]; then
+            echo "Nenhum dado de teste encontrado."
+          else
+            COVERAGE=$(echo "scale=2; 100 * $COVERED / $TOTAL" | bc)
+            echo "Cobertura de teste : $COVERAGE%"
+          fi
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: target/site/jacoco
