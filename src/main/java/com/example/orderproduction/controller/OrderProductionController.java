@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/orders")
-public class OrderController {
+@RequestMapping("/order-production/orders")
+public class OrderProductionController {
 
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService) {
+    public OrderProductionController(OrderService orderService) {
         this.orderService = orderService;
     }
 

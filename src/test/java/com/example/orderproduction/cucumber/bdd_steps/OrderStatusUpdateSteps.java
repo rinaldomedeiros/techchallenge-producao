@@ -55,8 +55,9 @@ public class OrderStatusUpdateSteps {
         Order order = new Order();
         order.setId(orderId);
         order.setStatus(OrderStatus.valueOf(status));
+        order.setDetails("{Lanche: Sanduiche de Soja, Bebida : Suco de Limão com Abacaxi}");
 
-        redisTemplate.opsForValue().set("order:" + orderId, order, 30, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set("order:" + orderId, order, 10, TimeUnit.SECONDS);
         System.out.println("Pedido " + orderId + " pré-carregado com status " + status + " no Redis.");
     }
 
@@ -65,8 +66,8 @@ public class OrderStatusUpdateSteps {
         OrderStatusUpdateDTO dto = new OrderStatusUpdateDTO();
         dto.setStatus(OrderStatus.valueOf(newStatus));
 
-        restTemplate.put("/orders/" + orderId + "/status", dto);
-        queryResponse = restTemplate.getForEntity("/orders/" + orderId, Order.class);
+        restTemplate.put("/order-production/orders/" + orderId + "/status", dto);
+        queryResponse = restTemplate.getForEntity("/order-production/orders/" + orderId, Order.class);
     }
 
     @Then("o pedido é enviado para a fila de pedidos atualizados")
