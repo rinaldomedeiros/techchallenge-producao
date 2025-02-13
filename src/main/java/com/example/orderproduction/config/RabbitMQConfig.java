@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     // Fila e exchange para pedidos pagos
-    public static final String PAID_ORDER_QUEUE = "paid.order.queue";
-    public static final String PAID_ORDER_EXCHANGE = "paid.order.exchange";
-    public static final String PAID_ORDER_ROUTING_KEY = "new.order";
+    public static final String CONFIRMED_ORDER_QUEUE = "confirmed.order.queue";
+    public static final String CONFIRMED_ORDER_EXCHANGE = "confirmed.order.exchange";
+    public static final String CONFIRMED_ORDER_ROUTING_KEY = "confirmed.order";
 
     // Fila e exchange para atualizações de pedidos
     public static final String UPDATED_ORDER_QUEUE = "updated.order.queue";
@@ -22,17 +22,17 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue paidOrderQueue() {
-        return QueueBuilder.durable(PAID_ORDER_QUEUE).build();
+        return QueueBuilder.durable(CONFIRMED_ORDER_QUEUE).build();
     }
 
     @Bean
     public TopicExchange paidOrderExchange() {
-        return new TopicExchange(PAID_ORDER_EXCHANGE);
+        return new TopicExchange(CONFIRMED_ORDER_EXCHANGE);
     }
 
     @Bean
     public Binding bindingPaidOrder(Queue paidOrderQueue, TopicExchange paidOrderExchange) {
-        return BindingBuilder.bind(paidOrderQueue).to(paidOrderExchange).with(PAID_ORDER_ROUTING_KEY);
+        return BindingBuilder.bind(paidOrderQueue).to(paidOrderExchange).with(CONFIRMED_ORDER_ROUTING_KEY);
     }
 
     @Bean

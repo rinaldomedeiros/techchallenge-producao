@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class OrderControllerTest {
+public class OrderProductionControllerTest {
 
     private MockMvc mockMvc;
     private OrderService orderService;
@@ -33,9 +33,9 @@ public class OrderControllerTest {
 
         orderService = Mockito.mock(OrderService.class);
 
-        OrderController orderController = new OrderController(orderService);
+        OrderProductionController orderProductionController = new OrderProductionController(orderService);
 
-        mockMvc = MockMvcBuilders.standaloneSetup(orderController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(orderProductionController).build();
 
         objectMapper = new ObjectMapper();
     }
@@ -53,7 +53,7 @@ public class OrderControllerTest {
         request.setStatus(newStatus);
 
         // Executa a requisição PUT e valida a resposta
-        mockMvc.perform(put("/orders/" + orderId + "/status")
+        mockMvc.perform(put("/order-production/orders/" + orderId + "/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -68,7 +68,7 @@ public class OrderControllerTest {
 
         when(orderService.getOrder(orderId)).thenReturn(order);
 
-        mockMvc.perform(get("/orders/" + orderId))
+        mockMvc.perform(get("/order-production/orders/" + orderId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(orderId))
                 .andExpect(jsonPath("$.status").value(OrderStatus.RECEBIDO.toString()));
@@ -80,7 +80,7 @@ public class OrderControllerTest {
 
         when(orderService.getOrder(orderId)).thenReturn(null);
 
-        mockMvc.perform(get("/orders/" + orderId))
+        mockMvc.perform(get("/order-production/orders/" + orderId))
                 .andExpect(status().isNotFound());
     }
 
@@ -93,7 +93,7 @@ public class OrderControllerTest {
 
         when(orderService.getOrdersByStatus(status)).thenReturn(orders);
 
-        mockMvc.perform(get("/orders/status")
+        mockMvc.perform(get("/order-production/orders/status")
                         .param("status", status.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value("1"))
@@ -106,7 +106,7 @@ public class OrderControllerTest {
 
         when(orderService.getOrdersByStatus(status)).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/orders/status")
+        mockMvc.perform(get("/order-production/orders/status")
                         .param("status", status.toString()))
                 .andExpect(status().isNoContent());
     }

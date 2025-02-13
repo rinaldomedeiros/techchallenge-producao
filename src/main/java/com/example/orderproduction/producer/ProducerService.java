@@ -23,8 +23,8 @@ public class ProducerService {
         order.setStatus(OrderStatus.RECEBIDO);
         order.setDetails(details);
         // Publica a mensagem na exchange de pedidos pagos
-        rabbitTemplate.convertAndSend(RabbitMQConfig.PAID_ORDER_EXCHANGE,
-                RabbitMQConfig.PAID_ORDER_ROUTING_KEY, order);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.CONFIRMED_ORDER_EXCHANGE,
+                RabbitMQConfig.CONFIRMED_ORDER_ROUTING_KEY, order);
         return order;
     }
 }
