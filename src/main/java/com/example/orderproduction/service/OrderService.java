@@ -45,8 +45,8 @@ public class OrderService {
         redisTemplate.opsForValue().set(key, order);
 
         Map<String, Object> updatedOrderMessage = new HashMap<>();
-        updatedOrderMessage.put("id", order.getId());
-        updatedOrderMessage.put("status", order.getStatus());
+        updatedOrderMessage.put("orderId", order.getId());
+        updatedOrderMessage.put("orderStatus", order.getStatus());
 
         rabbitTemplate.convertAndSend(RabbitMQConfig.UPDATED_ORDER_EXCHANGE,
                 RabbitMQConfig.UPDATED_ORDER_ROUTING_KEY, updatedOrderMessage);

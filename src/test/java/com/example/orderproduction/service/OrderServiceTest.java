@@ -42,72 +42,60 @@ public class OrderServiceTest {
         lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
-    // Testes para processOrder()
 
     @Test
     public void testProcessOrder_SetsStatusIfNull() {
-        // Arrange: Cria um pedido sem status definido (null)
+
         Order order = new Order("123", null, "Test details");
 
-        // Act: Processa o pedido
         orderService.processOrder(order);
 
-        // Assert: Verifica se o status foi definido para RECEBIDO
         assertEquals(OrderStatus.RECEBIDO, order.getStatus());
-        // Verifica se a operação de set foi chamada com os parâmetros corretos
+
         verify(valueOperations, times(1))
                 .set("order:" + order.getId(), order, 30, TimeUnit.MINUTES);
     }
 
     @Test
     public void testProcessOrder_KeepsExistingStatus() {
-        // Arrange: Cria um pedido com status já definido
+
         Order order = new Order("124", OrderStatus.EM_PREPARACAO, "Test details");
 
-        // Act: Processa o pedido
         orderService.processOrder(order);
 
-        // Assert: O status existente deve ser mantido
         assertEquals(OrderStatus.EM_PREPARACAO, order.getStatus());
         verify(valueOperations).set("order:" + order.getId(), order, 30, TimeUnit.MINUTES);
     }
 
-    // Testes para updateOrderStatus()
-
     @Test
     public void testUpdateOrderStatus_Success() {
-        // Arrange: Cria um pedido existente com status RECEBIDO
+
         String orderId = "123";
         Order order = new Order(orderId, OrderStatus.RECEBIDO, "Test details");
         OrderStatus newStatus = OrderStatus.EM_PREPARACAO;
         String key = ORDER_KEY_PREFIX + orderId;
         when(valueOperations.get(key)).thenReturn(order);
 
-        // Act: Atualiza o status do pedido
         Order updatedOrder = orderService.updateOrderStatus(orderId, newStatus);
 
         Map<String, Object> updatedOrderMessage = new HashMap<>();
-        updatedOrderMessage.put("id", order.getId());
-        updatedOrderMessage.put("status", order.getStatus());
+        updatedOrderMessage.put("orderId", order.getId());
+        updatedOrderMessage.put("orderStatus", order.getStatus());
 
-        // Assert: Verifica se o status foi atualizado e se as operações foram chamadas
         assertEquals(newStatus, updatedOrder.getStatus());
 
-        // 1. Verifica se o Map não é nulo
+
         assertNotNull(updatedOrderMessage);
 
-        // 2. Verifica se o objeto é uma instância de Map
         assertTrue(updatedOrderMessage instanceof Map);
 
-        // 3. Verifica se o Map possui exatamente 2 elementos
         assertEquals(2, updatedOrderMessage.size());
 
-        // 4. Verifica se contém a chave "id" com o valor esperado
-        assertTrue(updatedOrderMessage.containsKey("id"));
-        assertEquals("123", updatedOrderMessage.get("id"));
-        // 5. Verifica se contém a chave "status" com o valor esperado
-        assertTrue(updatedOrderMessage.containsKey("status"));
-        assertEquals(OrderStatus.EM_PREPARACAO, updatedOrderMessage.get("status"));
+        assertTrue(updatedOrderMessage.containsKey("orderId"));
+        assertEquals("123", updatedOrderMessage.get("orderId"));
+
+        assertTrue(updatedOrderMessage.containsKey("orderStatus"));
+        assertEquals(OrderStatus.EM_PREPARACAO, updatedOrderMessage.get("orderStatus"));
 
         verify(valueOperations).get(key);
         verify(valueOperations).set(key, order);
@@ -119,54 +107,46 @@ public class OrderServiceTest {
 
     @Test
     public void testUpdateOrderStatus_OrderNotFound() {
-        // Arrange: Simula a ausência do pedido no Redis
+
         String orderId = "123";
         OrderStatus newStatus = OrderStatus.EM_PREPARACAO;
         String key = ORDER_KEY_PREFIX + orderId;
         when(valueOperations.get(key)).thenReturn(null);
 
-        // Act & Assert: Espera que uma exceção seja lançada
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
                 orderService.updateOrderStatus(orderId, newStatus)
         );
         assertEquals("Pedido não encontrado com id: " + orderId, exception.getMessage());
     }
 
-    // Testes para getOrder()
 
     @Test
     public void testGetOrder_Found() {
-        // Arrange: Cria um pedido e simula sua existência no Redis
+
         String orderId = "123";
         Order order = new Order(orderId, OrderStatus.RECEBIDO, "Test details");
         when(valueOperations.get("order:" + orderId)).thenReturn(order);
 
-        // Act: Recupera o pedido
         Order result = orderService.getOrder(orderId);
 
-        // Assert: Verifica se o pedido retornado não é nulo e possui o id esperado
         assertNotNull(result);
         assertEquals(orderId, result.getId());
     }
 
     @Test
     public void testGetOrder_NotFound() {
-        // Arrange: Simula que nenhum pedido foi encontrado
         String orderId = "123";
         when(valueOperations.get("order:" + orderId)).thenReturn(null);
 
-        // Act: Tenta recuperar o pedido
         Order result = orderService.getOrder(orderId);
 
-        // Assert: O retorno deve ser nulo
         assertNull(result);
     }
 
-    // Testes para getOrdersByStatus()
 
     @Test
     public void testGetOrdersByStatus_Found() {
-        // Arrange: Cria três pedidos com status diferentes
+
         OrderStatus desiredStatus = OrderStatus.RECEBIDO;
         Order order1 = new Order("1", OrderStatus.RECEBIDO, "Details 1");
         Order order2 = new Order("2", OrderStatus.EM_PREPARACAO, "Details 2");
@@ -178,10 +158,8 @@ public class OrderServiceTest {
         when(valueOperations.get("order:2")).thenReturn(order2);
         when(valueOperations.get("order:3")).thenReturn(order3);
 
-        // Act: Busca os pedidos com o status desejado
         List<Order> orders = orderService.getOrdersByStatus(desiredStatus);
 
-        // Assert: Verifica se apenas os pedidos com o status RECEBIDO foram retornados
         assertEquals(2, orders.size());
         assertTrue(orders.contains(order1));
         assertTrue(orders.contains(order3));
