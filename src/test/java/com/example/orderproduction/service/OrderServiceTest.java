@@ -46,40 +46,40 @@ public class OrderServiceTest {
     @Test
     public void testProcessOrder_SetsStatusIfNull() {
 
-        Order order = new Order("123", null, "Test details");
+        Order order = new Order(123, null, "Test details");
 
         orderService.processOrder(order);
 
-        assertEquals(OrderStatus.RECEBIDO, order.getStatus());
+        assertEquals(OrderStatus.RECEIVED, order.getStatus());
 
         verify(valueOperations, times(1))
-                .set("order:" + order.getId(), order, 30, TimeUnit.MINUTES);
+                .set("order:" + order.getOrderId(), order, 30, TimeUnit.MINUTES);
     }
 
     @Test
     public void testProcessOrder_KeepsExistingStatus() {
 
-        Order order = new Order("124", OrderStatus.EM_PREPARACAO, "Test details");
+        Order order = new Order(124, OrderStatus.IN_PREPARATION, "Test details");
 
         orderService.processOrder(order);
 
-        assertEquals(OrderStatus.EM_PREPARACAO, order.getStatus());
-        verify(valueOperations).set("order:" + order.getId(), order, 30, TimeUnit.MINUTES);
+        assertEquals(OrderStatus.IN_PREPARATION, order.getStatus());
+        verify(valueOperations).set("order:" + order.getOrderId(), order, 30, TimeUnit.MINUTES);
     }
 
     @Test
     public void testUpdateOrderStatus_Success() {
 
-        String orderId = "123";
-        Order order = new Order(orderId, OrderStatus.RECEBIDO, "Test details");
-        OrderStatus newStatus = OrderStatus.EM_PREPARACAO;
+        int orderId = 123;
+        Order order = new Order(orderId, OrderStatus.RECEIVED, "Test details");
+        OrderStatus newStatus = OrderStatus.IN_PREPARATION;
         String key = ORDER_KEY_PREFIX + orderId;
         when(valueOperations.get(key)).thenReturn(order);
 
         Order updatedOrder = orderService.updateOrderStatus(orderId, newStatus);
 
         Map<String, Object> updatedOrderMessage = new HashMap<>();
-        updatedOrderMessage.put("orderId", order.getId());
+        updatedOrderMessage.put("orderId", order.getOrderId());
         updatedOrderMessage.put("orderStatus", order.getStatus());
 
         assertEquals(newStatus, updatedOrder.getStatus());
@@ -92,10 +92,10 @@ public class OrderServiceTest {
         assertEquals(2, updatedOrderMessage.size());
 
         assertTrue(updatedOrderMessage.containsKey("orderId"));
-        assertEquals("123", updatedOrderMessage.get("orderId"));
+        assertEquals(123, updatedOrderMessage.get("orderId"));
 
         assertTrue(updatedOrderMessage.containsKey("orderStatus"));
-        assertEquals(OrderStatus.EM_PREPARACAO, updatedOrderMessage.get("orderStatus"));
+        assertEquals(OrderStatus.IN_PREPARATION, updatedOrderMessage.get("orderStatus"));
 
         verify(valueOperations).get(key);
         verify(valueOperations).set(key, order);
@@ -108,8 +108,8 @@ public class OrderServiceTest {
     @Test
     public void testUpdateOrderStatus_OrderNotFound() {
 
-        String orderId = "123";
-        OrderStatus newStatus = OrderStatus.EM_PREPARACAO;
+        int orderId = 123;
+        OrderStatus newStatus = OrderStatus.IN_PREPARATION;
         String key = ORDER_KEY_PREFIX + orderId;
         when(valueOperations.get(key)).thenReturn(null);
 
@@ -123,19 +123,19 @@ public class OrderServiceTest {
     @Test
     public void testGetOrder_Found() {
 
-        String orderId = "123";
-        Order order = new Order(orderId, OrderStatus.RECEBIDO, "Test details");
+        int orderId = 123;
+        Order order = new Order(orderId, OrderStatus.RECEIVED, "Test details");
         when(valueOperations.get("order:" + orderId)).thenReturn(order);
 
         Order result = orderService.getOrder(orderId);
 
         assertNotNull(result);
-        assertEquals(orderId, result.getId());
+        assertEquals(orderId, result.getOrderId());
     }
 
     @Test
     public void testGetOrder_NotFound() {
-        String orderId = "123";
+        int orderId = 123;
         when(valueOperations.get("order:" + orderId)).thenReturn(null);
 
         Order result = orderService.getOrder(orderId);
@@ -147,10 +147,10 @@ public class OrderServiceTest {
     @Test
     public void testGetOrdersByStatus_Found() {
 
-        OrderStatus desiredStatus = OrderStatus.RECEBIDO;
-        Order order1 = new Order("1", OrderStatus.RECEBIDO, "Details 1");
-        Order order2 = new Order("2", OrderStatus.EM_PREPARACAO, "Details 2");
-        Order order3 = new Order("3", OrderStatus.RECEBIDO, "Details 3");
+        OrderStatus desiredStatus = OrderStatus.RECEIVED;
+        Order order1 = new Order(1, OrderStatus.RECEIVED, "Details 1");
+        Order order2 = new Order(2, OrderStatus.IN_PREPARATION, "Details 2");
+        Order order3 = new Order(3, OrderStatus.RECEIVED, "Details 3");
 
         Set<String> keys = new HashSet<>(Arrays.asList("order:1", "order:2", "order:3"));
         when(redisTemplate.keys("order:*")).thenReturn(keys);
@@ -168,9 +168,9 @@ public class OrderServiceTest {
     @Test
     public void testGetOrdersByStatus_NoMatchingOrders() {
         // Arrange: Cria pedidos que não possuem o status desejado
-        OrderStatus desiredStatus = OrderStatus.RECEBIDO;
-        Order order1 = new Order("1", OrderStatus.EM_PREPARACAO, "Details 1");
-        Order order2 = new Order("2", OrderStatus.EM_PREPARACAO, "Details 2");
+        OrderStatus desiredStatus = OrderStatus.RECEIVED;
+        Order order1 = new Order(1, OrderStatus.IN_PREPARATION, "Details 1");
+        Order order2 = new Order(2, OrderStatus.IN_PREPARATION, "Details 2");
 
         Set<String> keys = new HashSet<>(Arrays.asList("order:1", "order:2"));
         when(redisTemplate.keys("order:*")).thenReturn(keys);
@@ -187,7 +187,7 @@ public class OrderServiceTest {
     @Test
     public void testGetOrdersByStatus_NullKeys() {
         // Arrange: Simula que redisTemplate.keys(...) retorna null
-        OrderStatus desiredStatus = OrderStatus.RECEBIDO;
+        OrderStatus desiredStatus = OrderStatus.RECEIVED;
         when(redisTemplate.keys("order:*")).thenReturn(null);
 
         // Act: Chama o método
@@ -201,7 +201,7 @@ public class OrderServiceTest {
     @Test
     public void testGetOrdersByStatus_EmptyKeys() {
         // Arrange: Simula que redisTemplate.keys(...) retorna um conjunto vazio
-        OrderStatus desiredStatus = OrderStatus.RECEBIDO;
+        OrderStatus desiredStatus = OrderStatus.RECEIVED;
         when(redisTemplate.keys("order:*")).thenReturn(Collections.emptySet());
 
         // Act: Chama o método
@@ -215,8 +215,8 @@ public class OrderServiceTest {
     @Test
     public void testGetOrdersByStatus_SomeNullOrders() {
         // Arrange: Cria um cenário onde algumas chaves retornam pedidos nulos
-        OrderStatus desiredStatus = OrderStatus.RECEBIDO;
-        Order order1 = new Order("1", OrderStatus.RECEBIDO, "Details 1");
+        OrderStatus desiredStatus = OrderStatus.RECEIVED;
+        Order order1 = new Order(1, OrderStatus.RECEIVED, "Details 1");
         Order order2 = null;  // Simula pedido não encontrado
         Set<String> keys = new HashSet<>(Arrays.asList("order:1", "order:2"));
         when(redisTemplate.keys("order:*")).thenReturn(keys);
