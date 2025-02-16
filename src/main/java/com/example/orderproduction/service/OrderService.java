@@ -27,15 +27,16 @@ public class OrderService {
     }
 
     public void processOrder(Order order) {
-
         if (order.getStatus() == null) {
-            order.setStatus(OrderStatus.RECEBIDO);
+            order.setStatus(OrderStatus.RECEIVED);
         }
 
-        redisTemplate.opsForValue().set(ORDER_KEY_PREFIX + order.getId(), order, 30, TimeUnit.MINUTES);
+        String key = ORDER_KEY_PREFIX + order.getOrderId();
+        redisTemplate.opsForValue().set(key, order, 30, TimeUnit.MINUTES);
     }
 
-    public Order updateOrderStatus(String orderId, OrderStatus newStatus) {
+    public Order updateOrderStatus(int orderId, OrderStatus newStatus) {
+
         String key = ORDER_KEY_PREFIX + orderId;
         Order order = (Order) redisTemplate.opsForValue().get(key);
         if (order == null) {
@@ -45,22 +46,23 @@ public class OrderService {
         redisTemplate.opsForValue().set(key, order);
 
         Map<String, Object> updatedOrderMessage = new HashMap<>();
-        updatedOrderMessage.put("orderId", order.getId());
+        updatedOrderMessage.put("orderId", order.getOrderId());
         updatedOrderMessage.put("orderStatus", order.getStatus());
 
         rabbitTemplate.convertAndSend(RabbitMQConfig.UPDATED_ORDER_EXCHANGE,
                 RabbitMQConfig.UPDATED_ORDER_ROUTING_KEY, updatedOrderMessage);
 
-        logger.info("Enviado o pedido {} para fila de pedidos atualizados com o status {}", order.getId(), order.getStatus());
+        logger.info("Enviado o pedido {} para fila de pedidos atualizados com o status {}", order.getOrderId(), order.getStatus());
         return order;
     }
 
-    public Order getOrder(String orderId) {
-        return (Order) redisTemplate.opsForValue().get(ORDER_KEY_PREFIX + orderId);
+
+    public Order getOrder(int orderId) {
+        String key = ORDER_KEY_PREFIX + orderId;
+        return (Order) redisTemplate.opsForValue().get(key);
     }
 
     public List<Order> getOrdersByStatus(OrderStatus status) {
-
         Set<String> keys = redisTemplate.keys(ORDER_KEY_PREFIX + "*");
         List<Order> orders = new ArrayList<>();
         if (keys != null && !keys.isEmpty()) {

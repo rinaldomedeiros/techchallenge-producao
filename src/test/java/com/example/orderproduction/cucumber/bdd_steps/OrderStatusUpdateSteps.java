@@ -36,7 +36,7 @@ public class OrderStatusUpdateSteps {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
-    private String orderId;
+    private int orderId;
     private ResponseEntity<Order> queryResponse;
 
     public OrderStatusUpdateSteps(TestRestTemplate restTemplate, RedisTemplate<String, Object> redisTemplate) {
@@ -51,9 +51,9 @@ public class OrderStatusUpdateSteps {
 
     @Given("que recebo um pedido com status {string}")
     public void iReceiveAnOrderWithStatus(String status) {
-        orderId = "123";
+        orderId = 123;
         Order order = new Order();
-        order.setId(orderId);
+        order.setOrderId(orderId);
         order.setStatus(OrderStatus.valueOf(status));
         order.setDetails("{Lanche: Sanduiche de Soja, Bebida : Suco de Limão com Abacaxi}");
 

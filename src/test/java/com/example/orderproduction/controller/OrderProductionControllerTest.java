@@ -42,8 +42,8 @@ public class OrderProductionControllerTest {
 
     @Test
     public void testUpdateStatus() throws Exception {
-        String orderId = "123";
-        OrderStatus newStatus = OrderStatus.EM_PREPARACAO;
+        int orderId = 123;
+        OrderStatus newStatus = OrderStatus.IN_PREPARATION;
         Order updatedOrder = new Order(orderId, newStatus, "Order details");
 
         // Configura o comportamento do serviço mockado
@@ -57,26 +57,26 @@ public class OrderProductionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(orderId))
+                .andExpect(jsonPath("$.orderId").value(orderId))
                 .andExpect(jsonPath("$.status").value(newStatus.toString()));
     }
 
     @Test
     public void testGetOrderFound() throws Exception {
-        String orderId = "123";
-        Order order = new Order(orderId, OrderStatus.RECEBIDO, "Test details");
+        int orderId = 123;
+        Order order = new Order(orderId, OrderStatus.RECEIVED, "Test details");
 
         when(orderService.getOrder(orderId)).thenReturn(order);
 
         mockMvc.perform(get("/order-production/orders/" + orderId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(orderId))
-                .andExpect(jsonPath("$.status").value(OrderStatus.RECEBIDO.toString()));
+                .andExpect(jsonPath("$.orderId").value(orderId))
+                .andExpect(jsonPath("$.status").value(OrderStatus.RECEIVED.toString()));
     }
 
     @Test
     public void testGetOrderNotFound() throws Exception {
-        String orderId = "123";
+       int orderId = 123;
 
         when(orderService.getOrder(orderId)).thenReturn(null);
 
@@ -86,9 +86,9 @@ public class OrderProductionControllerTest {
 
     @Test
     public void testGetOrdersByStatusFound() throws Exception {
-        OrderStatus status = OrderStatus.RECEBIDO;
-        Order order1 = new Order("1", status, "Details 1");
-        Order order2 = new Order("2", status, "Details 2");
+        OrderStatus status = OrderStatus.RECEIVED;
+        Order order1 = new Order(1, status, "Details 1");
+        Order order2 = new Order(2, status, "Details 2");
         List<Order> orders = Arrays.asList(order1, order2);
 
         when(orderService.getOrdersByStatus(status)).thenReturn(orders);
@@ -96,18 +96,18 @@ public class OrderProductionControllerTest {
         mockMvc.perform(get("/order-production/orders/status")
                         .param("status", status.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value("1"))
-                .andExpect(jsonPath("$[1].id").value("2"));
+                .andExpect(jsonPath("$[0].orderId").value("1"))
+                .andExpect(jsonPath("$[1].orderId").value("2"));
     }
 
     @Test
-    public void testGetOrdersByStatusNoContent() throws Exception {
-        OrderStatus status = OrderStatus.EM_PREPARACAO;
+    public void testGetOrdersByStatusNotFound() throws Exception {
+        OrderStatus status = OrderStatus.IN_PREPARATION;
 
         when(orderService.getOrdersByStatus(status)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/order-production/orders/status")
                         .param("status", status.toString()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 }

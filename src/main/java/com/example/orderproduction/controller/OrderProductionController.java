@@ -20,14 +20,19 @@ public class OrderProductionController {
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Order> updateStatus(@PathVariable("id") String orderId,
+    public ResponseEntity<Order> updateStatus(@PathVariable("id") int orderId,
                                               @RequestBody OrderStatusUpdateDTO request) {
-        Order updatedOrder = orderService.updateOrderStatus(orderId, request.getStatus());
-        return ResponseEntity.ok(updatedOrder);
+        try {
+            Order updatedOrder = orderService.updateOrderStatus(orderId, request.getStatus());
+            return ResponseEntity.ok(updatedOrder);
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrder(@PathVariable("id") String orderId) {
+    public ResponseEntity<Order> getOrder(@PathVariable("id") int orderId) {
         Order order = orderService.getOrder(orderId);
         if (order == null) {
             return ResponseEntity.notFound().build();
@@ -39,7 +44,7 @@ public class OrderProductionController {
     public ResponseEntity<List<Order>> getOrdersByStatus(@RequestParam("status") OrderStatus status) {
         List<Order> orders = orderService.getOrdersByStatus(status);
         if (orders.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(orders);
     }

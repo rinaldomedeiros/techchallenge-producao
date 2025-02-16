@@ -24,7 +24,7 @@ public class OrderEventListenerTest {
     @Test
     public void testReceiveOrder() {
 
-        Order order = new Order("1", OrderStatus.RECEBIDO, "Detalhes do pedido");
+        Order order = new Order(1, OrderStatus.RECEIVED, "Detalhes do pedido");
 
         orderEventListener.receiveOrder(order);
 
