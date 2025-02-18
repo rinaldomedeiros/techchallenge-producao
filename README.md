@@ -42,7 +42,11 @@ Os dados são armazenados utilizando o **Redis**, onde:
 
 ## 4. Desenho de Solução
 
-O microsserviço de produção está sempre recebendo eventos através da fila RabbitMQ de CONFIRMED_ORDER_QUEUE do microsserviço de pedido e conforme os status de pedido são atualizados são produzidos eventos na fila UPDATED_ORDER_QUEUE para atualizar o status do pedido na base de pedido mantendo a consistência de dados a cada atualização : 
+O microsserviço de produção está sempre recebendo eventos através da fila RabbitMQ de *CONFIRMED_ORDER_QUEUE* do microsserviço de pedido.
+
+Conforme os status de pedido são atualizados são produzidos eventos na fila *UPDATED_ORDER_QUEUE* para atualizar o status do pedido na base de pedido mantendo a consistência de dados a cada atualização. 
+
+A persistência de dados é realizada através do Redis que mantêm como key para recuperação de informações do pedido o orderId.
 
 ![Desenho de Solução Microsserviços](./assets/TechChallenge-Modulo4%20-%20Desenho%20de%20Solução.png)
 
