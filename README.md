@@ -42,6 +42,8 @@ Os dados são armazenados utilizando o **Redis**, onde:
 
 ## 4. Desenho de Solução
 
+O microsserviço de produção está sempre recebendo eventos através da fila RabbitMQ de CONFIRMED_ORDER_QUEUE do microsserviço de pedido e conforme os status de pedido são atualizados são produzidos eventos na fila UPDATED_ORDER_QUEUE para atualizar o status do pedido na base de pedido mantendo a consistência de dados a cada atualização : 
+
 ![Desenho de Solução Microsserviços](./assets/TechChallenge-Modulo4%20-%20Desenho%20de%20Solução.png)
 
 ---
@@ -73,12 +75,19 @@ O gerenciador do projeto é o maven e comando utilizado para realizar a execuç�
 
 Abaixo seguem as evidências da cobertura total de testes unitários ( considerando as classes de service, repository e controller. Não foram incluídas classes de configuração na cobertura por não conter lógica e regras de negócio) 
 
+1. Execução de Testes Unitários :
 
 ![Execução de Testes Unitários](./assets/Testes%20Executados%20MVN%20Clean%20Package%20.png)
 
+2. Execução do Cenário BDD : 
+
 ![Execução do Cenário BDD](./assets/Scenario%20BDD%20Executado.png)
 
+3. Cobertura total de Testes Unitários : 
+
 ![Cobertura de Testes Unitários](./assets/Cobertura%20Total%20de%20Testes.png)
+
+4. Build com sucesso da Action no Github : 
 
 ![Build da Action  Executado com Sucesso](./assets/Visão%20do%20Build%20Executado.png)
 
