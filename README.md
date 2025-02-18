@@ -26,7 +26,8 @@ O microsserviço disponibiliza os seguintes endpoints:
   Retorna as informações de um pedido específico.
 
 - **GET `/order-production/orders/status?`**  
-  Consulta pedidos com base em seu status (parâmetros opcionais podem ser utilizados para filtrar a consulta).
+  Consulta pedidos com base em seu status de acordo com a etapa do pedido são eles "RECEIVED", "IN_PREPARATION", "READY", "FINISHED" 
+
 
 ---
 
@@ -55,6 +56,10 @@ Para executar o projeto localmente, siga os passos abaixo:
    ```bash
    docker compose up --build
 
+   ```
+
+   3.Após a conclusão do build acesse o `localhost:8083/swagger.ui.html` e realize o teste nos endpoints disponiveis 
+
 ## 6. Execução de Testes e Cobertura 
 
 Está configurada um arquivo de workflow do git com a execução de testes unitários e um cenário de execução BDD ( teste integrado ) 
@@ -63,6 +68,8 @@ O gerenciador do projeto é o maven e comando utilizado para realizar a execuç�
 
 ```bash
    mvn clean verify 
+
+```
 
 Abaixo seguem as evidências da cobertura total de testes unitários ( considerando as classes de service, repository e controller ) 
 
