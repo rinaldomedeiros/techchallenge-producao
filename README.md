@@ -42,7 +42,7 @@ Os dados são armazenados utilizando o **Redis**, onde:
 
 ## 4. Desenho de Solução
 
-
+![Desenho de Solução Microsserviços](./assets/TechChallenge-Modulo4%20-%20Desenho%20de%20Solução.png)
 
 ---
 
@@ -71,5 +71,15 @@ O gerenciador do projeto é o maven e comando utilizado para realizar a execuç�
 
 ```
 
-Abaixo seguem as evidências da cobertura total de testes unitários ( considerando as classes de service, repository e controller ) 
+Abaixo seguem as evidências da cobertura total de testes unitários ( considerando as classes de service, repository e controller. Não foram incluídas classes de configuração na cobertura por não conter lógica e regras de negócio) 
 
+
+![Execução de Testes Unitários](./assets/Testes%20Executados%20MVN%20Clean%20Package%20.png)
+
+![Execução do Cenário BDD](./assets/Scenario%20BDD%20Executado.png)
+
+![Cobertura de Testes Unitários](./assets/Cobertura%20Total%20de%20Testes.png)
+
+![Build da Action  Executado com Sucesso](./assets/Visão%20do%20Build%20Executado.png)
+
+Segue o link da action para conferência : (https://github.com/rinaldomedeiros/techchallenge-producao/actions/runs/13383120500/job/37375048880)
